@@ -502,18 +502,9 @@ void Gopher::handleMouseMovement()
   short tx;
   short ty;
 
-  if (SWAP_THUMBSTICKS == 0)
-  {
-    // Use left stick
-    tx = _currentState.Gamepad.sThumbLX;
-    ty = _currentState.Gamepad.sThumbLY;
-  }
-  else
-  {
-    // Use right stick
-    tx = _currentState.Gamepad.sThumbRX;
-    ty = _currentState.Gamepad.sThumbRY;
-  }
+  // Use right stick
+  tx = _currentState.Gamepad.sThumbRX;
+  ty = _currentState.Gamepad.sThumbRY;
 
   float x = cursor.x + _xRest;
   float y = cursor.y + _yRest;
@@ -546,27 +537,54 @@ void Gopher::handleScrolling()
 {
   float tx;
   float ty;
-  
-  if (SWAP_THUMBSTICKS == 0)
-  {
-    // Use right stick
-    tx = getDelta(_currentState.Gamepad.sThumbRX);
-    ty = getDelta(_currentState.Gamepad.sThumbRY);
-  }
-  else
-  {
-    // Use left stick
-    tx = getDelta(_currentState.Gamepad.sThumbLX);
-    ty = getDelta(_currentState.Gamepad.sThumbLY);
-  }
+
+  // Use left stick
+  tx = getDelta(_currentState.Gamepad.sThumbLX);
+  ty = getDelta(_currentState.Gamepad.sThumbLY);
 
   // Handle dead zone
   float magnitude = sqrt(tx * tx + ty * ty);
 
   if (magnitude > SCROLL_DEAD_ZONE)
   {
-    mouseEvent(MOUSEEVENTF_HWHEEL, tx * getMult(tx * tx, SCROLL_DEAD_ZONE) * SCROLL_SPEED);
-    mouseEvent(MOUSEEVENTF_WHEEL, ty * getMult(ty * ty, SCROLL_DEAD_ZONE) * SCROLL_SPEED);
+    INPUT inputV;
+    WORD vkey;
+    if(ty > 0){
+      vkey = 0x57;
+    }
+    else{
+      vkey = 0x53;
+    }
+    inputV.type=INPUT_KEYBOARD;
+    inputV.ki.wScan = MapVirtualKey(vkey, MAPVK_VK_TO_VSC);
+    inputV.ki.time = 0;
+    inputV.ki.dwExtraInfo = 0;
+    inputV.ki.wVk = vkey;
+    inputV.ki.dwFlags = 0;
+    SendInput(1, &inputV, sizeof(INPUT));
+    inputV.ki.dwFlags = KEYEVENTF_KEYUP;
+    SendInput(1, &inputV, sizeof(INPUT));
+
+    INPUT inputH;
+    vkey;
+    if(tx > 0){
+      vkey = 0x44;
+    }
+    else{
+      vkey = 0x41;
+    }
+    inputH.type=INPUT_KEYBOARD;
+    inputH.ki.wScan = MapVirtualKey(vkey, MAPVK_VK_TO_VSC);
+    inputH.ki.time = 0;
+    inputH.ki.dwExtraInfo = 0;
+    inputH.ki.wVk = vkey;
+    inputH.ki.dwFlags = 0;
+    SendInput(1, &inputH, sizeof(INPUT));
+    inputH.ki.dwFlags = KEYEVENTF_KEYUP;
+    SendInput(1, &inputH, sizeof(INPUT));
+
+    //mouseEvent(MOUSEEVENTF_HWHEEL, tx * getMult(tx * tx, SCROLL_DEAD_ZONE) * SCROLL_SPEED);
+    //mouseEvent(MOUSEEVENTF_WHEEL, ty * getMult(ty * ty, SCROLL_DEAD_ZONE) * SCROLL_SPEED);
   }
 }
 
